@@ -3,18 +3,18 @@ const Circuit = require("./Circuit");
 const Out = require("./devices/drains/Out");
 const Inp = require("./devices/sources/Inp");
 const Wire = require("./Wire");
-const seedrandom = require("seedrandom");
+const seedRandom = require("seedrandom");
 
 class CircuitFactory {
     constructor(seed) {
         if (seed) {
             this.seed = seed;
-            this.rgen = seedrandom(this.seed);
-        } else this.rgen = seedrandom();
+            this.rgen = seedRandom(this.seed);
+        } else this.rgen = seedRandom();
     }
 
     resetGenerator() {
-        this.rgen = seedrandom(this.seed);
+        this.rgen = seedRandom(this.seed);
     }
 
     genRandCircuitComb(numInp, numOut, numDevices) {
