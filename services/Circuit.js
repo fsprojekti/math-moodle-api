@@ -1,10 +1,43 @@
 const Inp = require('./devices/sources/Inp');
 const Out = require('./devices/drains/Out');
+const Wire = require("./Wire");
 
 class Circuit {
     constructor() {
         this.devices = [];
         this.wires = [];
+    }
+
+    //Calculate clcEvent for all devices
+    //Repeat until number of devices with state 0 is not changing anymore
+    clcEvent() {
+        while (true) {
+            let devicesWithState0 = this.devices.filter((device) => {
+                return device.state === 0
+            });
+            devicesWithState0.forEach((device) => {
+                device.clcEvent();
+            });
+            let newDevicesWithState0 = this.devices.filter((device) => {
+                return device.state === 0;
+            });
+            if (newDevicesWithState0.length === devicesWithState0.length) {
+                break;
+            }
+        }
+        //Return current output values
+        let out = this.devices.filter((device) => {
+                return device instanceof Out
+            }
+        ).map((device) => {
+            return device.getValue();
+        });
+        //Clear all devices
+        this.devices.forEach((device) => {
+                device.clear();
+            }
+        );
+        return out;
     }
 
     toJSON() {
@@ -74,18 +107,27 @@ class Circuit {
         //Set input values
         this.devices.filter(d => {
             return d instanceof Inp
-        }).forEach((inp,i)=>{
-            inp.value=inpVal[i];
+        }).forEach((inp, i) => {
+            inp.value = inpVal[i];
         })
         //Get output values
-        let outValues=[];
+        let outValues = [];
         this.devices.filter(d => {
             return d instanceof Out
-        }).forEach((out,i)=>{
+        }).forEach((out, i) => {
             outValues.push(out.getValue())
         })
         return outValues;
     }
+
+    addWire(sourceDevice, targetDevice) {
+        let wire = new Wire();
+        wire = sourceDevice.addWireSource(wire);
+        wire = targetDevice.addWireTarget(wire);
+        this.wires.push(wire);
+    }
+
+
 }
 
 module.exports = Circuit;

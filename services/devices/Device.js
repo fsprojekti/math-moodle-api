@@ -1,35 +1,57 @@
-
-
 //import crypto from "crypto";
 
+const PinSource = require("../PinSource");
+const PinTarget = require("../PinTarget");
+
 class Device {
-    constructor(limitNumInp) {
+    constructor(initialValue) {
         //this.id=crypto.randomBytes(10).toString('hex');
-        this.inpPins = [];
-        this.outPins = [];
-        this.limitNumInp=limitNumInp;
+        this.pinsSource = [];
+        this.pinsTarget = [];
+        this.value = null;
+        if (initialValue === undefined) {
+            initialValue = 0;
+        }
+        this.initialValue = initialValue;
+        //States of devices
+        //0 - not calculated
+        //1 - calculated
+        this.state = 0;
     }
 
-    toSymbolic(expression){
+    clear() {
+        this.state = 0;
+        this.value = this.initialValue;
+    }
+
+    reset() {
+        this.value = null
+        this.state = 0;
+    }
+
+    clcEvent() {
+    }
+
+    toSymbolic(expression) {
         return expression;
     }
 
-    getOutputConnectedDevices(){
-        let devices=[];
-        devices.push(this);
-        this.outPins.forEach((pin)=>{
-            pin.wires.forEach((wire)=>{
-                let d=wire.targetPin.device.getOutputConnectedDevices();
-                devices=devices.concat(d);
-            })
-        });
-        return devices;
+    addWireSource(wire) {
+        let pin = new PinSource(this);
+        pin.wire = wire;
+        this.pinsSource.push(pin);
+        wire.pinSource=pin;
+        return wire;
     }
 
-    getValue(){
-        return null;
-    }
+    addWireTarget(wire) {
+        let pin = new PinTarget(this);
+        pin.wire = wire;
+        this.pinsTarget.push(pin);
+        wire.pinTarget=pin;
+        return wire;
 
+    }
 }
 
 module.exports = Device;

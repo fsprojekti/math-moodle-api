@@ -1,41 +1,53 @@
 const Device = require("../Device");
 
 class Delay extends Device {
-    constructor() {
-        super();
-        this.memory = true;
-        this.state = false;
+    constructor(initialValue) {
+        super(initialValue);
+        this.valueNext = 0;
+        if (initialValue === undefined) initialValue = 0;
+        this.value = initialValue;
     }
 
-    getValue() {
-        return this.state;
+    clcEvent() {
+        //Check if all inputs have value break out of function if one of them return null
+        if (this.pinsTarget[0].wire.getValue() === null) {
+            return;
+        }
+        this.valueNext = this.pinsTarget[0].wire.getValue();
+        this.state = 1;
     }
 
-    clcState() {
-        this.state = this.inpPins[0].getValue();
+    clear() {
+        this.state = 0;
+        this.value = this.valueNext;
+    }
+
+    reset() {
+        this.state = 0;
+        this.value = this.initialValue;
     }
 
     toSymbolic(expression) {
-        let out="(";
-        this.inpPins.forEach((pin)=>{
-            out+=pin.toSymbolic();
-            out+="\\cdot "
-        });
-        out=out.substr(0,out.length-6);
-        out+=")";
-        return out;
+        return "(" + this.pinsSource[0].toSymbolic() + ")";
+
     }
 
     toExpression(expression) {
-        let out="(";
-        this.inpPins.forEach((pin)=>{
-            out+=pin.toExpression();
-            out+=" AND "
+        let out = "(";
+        this.pinsSource.forEach((pin) => {
+            out += pin.toExpression();
+            out += " AND "
         });
-        out=out.substr(0,out.length-5);
-        out+=")";
+        out = out.substr(0, out.length - 5);
+        out += ")";
         return out;
     }
+
+    getValue() {
+        return this.value;
+    }
+
+
 }
 
 module.exports = Delay

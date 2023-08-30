@@ -17,37 +17,24 @@ class CircuitFactory {
         this.rgen = seedRandom(this.seed);
     }
 
-    genRandCircuitComb(numInp, numOut, numDevices) {
+    generate(numInp, numOut, numGates, numMemory, listGates, listMemory) {
         let c = new Circuit();
+
         //Input devices
         for (let i = 0; i < numInp; i++) {
             c.devices.push(DeviceFactory.fromString("Inp"));
-            // //Randomize out pin
-            // if (this.genRandInt([0, 1]) === 0) {
-            //     c.devices[c.devices.length - 1].outPins[0].negation = true;
-            // }
         }
         //Output devices
         for (let i = 0; i < numOut; i++) {
             c.devices.push(DeviceFactory.fromString("Out"));
-            //Randomize inp pin
-            if (this.genRandInt([0, 1]) === 0) {
-                c.devices[c.devices.length - 1].inpPins[0].negation = true;
-            }
         }
         //Gates
-        for (let i = 0; i < numDevices; i++) {
-            c.devices.push(this.genRandGate());
-            // //Randomize out pin
-            // if (this.genRandInt([0, 1]) === 0) {
-            //     c.devices[c.devices.length - 1].outPins[0].negation = true;
-            // }
-            //Randomize inp pins
-            c.devices[c.devices.length - 1].inpPins.forEach((pin) => {
-                if (this.genRandInt([0, 1]) === 0) {
-                    pin.negation = true;
-                }
-            })
+        for (let i = 0; i < numGates; i++) {
+            c.devices.push(this.genRandGate(listGates));
+        }
+        //Memory
+        for (let i = 0; i < numMemory; i++) {
+            c.devices.push(this.genRandMemory(listMemory));
         }
         //Wire circuit
         //Gather all input pins
@@ -58,50 +45,15 @@ class CircuitFactory {
         let oPins = Array.prototype.concat.apply([], c.devices.map((device) => {
             return device.outPins
         }));
-        let oPinsExt = [];
-        oPins.forEach((pin, ind) => {
-            oPinsExt.push([ind, pin, 0]);
-        });
-        //Connect them randomly with wires
-        //Copy outPins
-        while (iPins.length > 0) {
+
+        while (iPins.length) {
             //Select random inpPin
             let ind1 = this.genRandInt([0, iPins.length - 1]);
-            //Filter output connected devices to prevent feedback loops
-            let conDevices = iPins[ind1].device.getOutputConnectedDevices();
-            let buffer = oPinsExt.filter(row => {
-                return !conDevices.includes(row[1].device)
-            });
-            //If pin is part of output device filter direct input connections
-            if (iPins[ind1].device instanceof Out){
-                buffer=buffer.filter(row=>{
-                    return !(row[1].device instanceof Inp)
-                })
-            }
-            buffer = buffer.slice();
-            //Shuffle
-            let shuffled = [];
-            while (buffer.length > 0) {
-                let ind = this.genRandInt([0, buffer.length - 1]);
-                shuffled.push(buffer[ind]);
-                buffer.splice(ind, 1);
-            }
-            //Sort pins by number of connections
-            shuffled.sort((a, b) => {
-                return a[2] - b[2];
-            });
-            //Crete wire
-            let w = new Wire(shuffled[0][1], iPins[ind1],);
-            iPins[ind1].addWire(w);
-            shuffled[0][1].addWire(w);
-            c.wires.push(w);
-            oPinsExt.filter((row) => {
-                return row[0] === shuffled[0][0];
-            })[0][2]++;
-            //Remove input pin
-            iPins.splice(ind1, 1);
+
+
         }
         return c
+        //TODO randomise pins negation
     }
 
     genRandDevice() {
@@ -109,14 +61,56 @@ class CircuitFactory {
         return DeviceFactory.fromString(DeviceFactory.listDevices()[ind]);
     }
 
-    genRandGate() {
-        let ind = this.genRandInt([0, DeviceFactory.listGates().length - 1]);
-        return DeviceFactory.fromString(DeviceFactory.listGates()[ind]);
+    genRandGate(listGates) {
+        if (listGates === null) listGates = DeviceFactory.listGates();
+        let ind = this.genRandInt([0, listGates.length - 1]);
+        return DeviceFactory.fromString(listGates()[ind]);
+    }
+
+    genRandMemory(listMemory) {
+        if (listMemory === null) listMemory = DeviceFactory.listMemory();
+        let ind = this.genRandInt([0, listMemory.length - 1]);
+        return DeviceFactory.fromString(listMemory[ind]);
     }
 
     genRandInt(limits) {
-        return Math.floor((limits[1]+1 - limits[0]) * this.rgen() + limits[0]);
+        return Math.floor((limits[1] + 1 - limits[0]) * this.rgen() + limits[0]);
     }
+
+    genRandBool() {
+        return this.genRandInt([0, 1]) === 0;
+    }
+
+
+    // dfs_traversal(startDevice, targetDevice, visited, devicesGraph) {
+    //     if (startDevice === targetDevice) {
+    //         return [startDevice];
+    //     }
+    //
+    //     visited.add(startDevice);
+    //
+    //     if (devicesGraph[startDevice]) {
+    //         for (let nextDevice of devicesGraph[startDevice]) {
+    //             if (!visited.has(nextDevice)) {
+    //                 let path = this.dfs_traversal(nextDevice, targetDevice, visited, devicesGraph);
+    //                 if (path.length) {
+    //                     return [startDevice].concat(path);
+    //                 }
+    //             }
+    //         }
+    //     }
+    //
+    //     return [];
+    // }
+    //
+    // has_memory_device_in_loop(loopDevices, memoryDevices) {
+    //     for (let device of loopDevices) {
+    //         if (memoryDevices.includes(device)) {
+    //             return true;
+    //         }
+    //     }
+    //     return false;
+    // }
 }
 
 module.exports = CircuitFactory;

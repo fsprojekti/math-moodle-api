@@ -6,6 +6,7 @@ const Nand = require("./gates/Nand");
 const Nor = require("./gates/Nor");
 const Xor = require("./gates/Xor");
 const Xnor = require("./gates/Xnor");
+const Delay = require("./memory/Delay");
 
 class DeviceFactory {
     constructor() {
@@ -39,6 +40,9 @@ class DeviceFactory {
             case "Xnor": {
                 return new Xnor();
             }
+            case "Delay": {
+                return new Delay();
+            }
             default : {
                 return null;
             }
@@ -46,11 +50,15 @@ class DeviceFactory {
     }
 
     static listDevices() {
-        return ['Inp', 'Out', 'And', 'Or','Nand','Nor','Xor','Xnor'];
+        return ['Inp', 'Out', 'And', 'Or','Nand','Nor','Xor','Xnor','Delay'];
     }
 
     static listGates() {
         return ['And', 'Or', 'Nand','Nor','Xor','Xnor'];
+    }
+
+    static listMemory() {
+        return ['Delay'];
     }
 
 

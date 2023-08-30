@@ -1,10 +1,14 @@
 //import crypto from "crypto";
 
 class Wire {
-    constructor(sourcePin, targetPin) {
+    constructor(pinSource, pinTarget) {
         // this.id=crypto.randomBytes(10).toString('hex');
-        this.sourcePin = sourcePin;
-        this.targetPin = targetPin;
+        this.pinSource = pinSource;
+        this.pinTarget = pinTarget;
+    }
+
+    getValue() {
+        return this.pinSource.getValue();
     }
 }
 

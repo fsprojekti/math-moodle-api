@@ -1,31 +1,43 @@
 let Device = require("../Device");
-let PinInp = require("../../PinInp");
-let PinOut = require("../../PinOut");
 
 class Xor extends Device {
     constructor() {
-        super([2,4]);
-        this.inpPins = [new PinInp(this), new PinInp(this)];
-        this.outPins=[new PinOut(this)];
+        super(null);
+    }
+
+    clcEvent() {
+        //Check if all inputs have value break out of function if one of them return null
+        for (let i = 0; i < this.pinsTarget.length; i++) {
+            if (this.pinsTarget[i].wire.getValue() === null) {
+                return;
+            }
+        }
+        //Calculate logic XOR function with multiple inputs for any length of inputs result should be true or false not 1 and 0
+        let result = false;
+        for (let i = 0; i < this.pinsTarget.length; i++) {
+            result = result ^ this.pinsTarget[i].wire.getValue();
+        }
+        this.value = result;
+        this.state = 1;
     }
 
     toSymbolic(expression) {
-        let out="(";
-        this.inpPins.forEach((pin)=>{
-            out+=pin.toSymbolic();
-            out+="\\oplus "
+        let out = "(";
+        this.inpPins.forEach((pin) => {
+            out += pin.toSymbolic();
+            out += "\\oplus "
         });
-        out=out.substr(0,out.length-7);
-        out+=")";
+        out = out.substr(0, out.length - 7);
+        out += ")";
         return out;
     }
 
     getValue() {
-        let out=0;
-        this.inpPins.forEach(pin=>{
-            if (pin.getValue()) out++
-        })
-        return out % 2 === 0;
+        if (this.state === 0) {
+            return null;
+        } else {
+            return this.value;
+        }
     }
 }
 

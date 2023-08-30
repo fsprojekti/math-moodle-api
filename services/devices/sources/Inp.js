@@ -1,15 +1,18 @@
 const Device = require("../Device");
-const PinOut = require("../../PinOut");
+const PinSource = require("../../PinSource");
 
 class Inp extends Device {
     constructor() {
-        super([0, 0]);
-        this.outPins = [new PinOut(this)];
-        this.value=false;
+        super(0);
     }
 
-    setSymbolic(ind){
-        this.symbol="x_{"+ind+"}";
+    clcEvent() {
+        this.value = this.initialValue;
+        this.state = 1;
+    }
+
+    setSymbolic(ind) {
+        this.symbol = "x_{" + ind + "}";
     }
 
     toSymbolic(expression) {
@@ -22,4 +25,4 @@ class Inp extends Device {
 
 }
 
-module.exports=Inp;
+module.exports = Inp;
